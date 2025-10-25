@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose'); //  REMOVED - Not used
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb"); // Import ObjectId
 const bcrypt = require("bcrypt");
@@ -15,13 +15,20 @@ const dbPass = process.env.DB_PASS;
 app.use(cors());
 app.use(express.json());
 
+//
+// --- THIS IS THE MAIN FIX ---
+// Changed from double quotes (") to backticks (`)
+//
 const uri =
   process.env.MONGO_URI ||
-  "mongodb+srv://${dbId}:${dbPass}@cluster0.hnylpj5.mongodb.net/sallery?retryWrites=true&w=majority";
+  `mongodb+srv://${dbId}:${dbPass}@cluster0.hnylpj5.mongodb.net/sallery?retryWrites=true&w=majority`;
 
-mongoose.connect(connectionString)
-  .then(() => console.log('Connected to MongoDB!'))
-  .catch(err => console.error('Could not connect to MongoDB:', err));
+//
+// --- REMOVED - This block was not being used ---
+//
+// mongoose.connect(uri)
+//   .then(() => console.log('Connected to MongoDB!'))
+//   .catch(err => console.error('Could not connect to MongoDB:', err));
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -361,4 +368,3 @@ run().catch(console.dir);
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
 });
-
