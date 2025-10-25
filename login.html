@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Tuition Management</title>
+    <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+    <div class="login-container"> 
+        <div class="login-info"> 
+            <h2>Tuition Management</h2> 
+            <p>Welcome back! Please login to your account.</p>
+        </div>
+        <div class="login-box"> 
+            <h2>Login</h2> 
+            <form>
+                <div class="input-group">
+                    <label for="email">Email</label> 
+                    <input type="email" id="email" placeholder="Enter your email" required> 
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div> 
+                <button type="submit" class="btn">Login</button> 
+            </form> 
+            <div class="links"> 
+                <a href="#">Forgot Password?</a> 
+                <a href="signup.html">Create an account</a> 
+            </div> 
+        </div>
+    </div>
+
+<script>
+    // This is the only form handler now, which is correct.
+    const form = document.querySelector('form');
+    form.addEventListener('submit', handleLogin);
+
+    async function handleLogin(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        // Clear previous errors
+        const errorElement = document.getElementById("error-message");
+        if (errorElement) {
+            errorElement.remove();
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                // Redirect to a dashboard or main page
+                window.location.href = "teacher.html";
+            } else {
+                // Display error message on the form
+                const newErrorElement = document.createElement("p");
+                newErrorElement.id = "error-message";
+                newErrorElement.textContent = "❌ " + data.error;
+                newErrorElement.style.color = "red";
+                newErrorElement.style.textAlign = "center";
+                newErrorElement.style.marginTop = "10px";
+                form.insertBefore(newErrorElement, form.querySelector(".btn"));
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            alert("Something went wrong! Could not connect to the server.");
+        }
+    }
+</script>
+</body>
+</html>

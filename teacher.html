@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* General Reset & Body Styling */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background-color: #f7fafc;
+        color: #2d3748;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Main Dashboard Layout */
+      .dashboard-container {
+        display: flex;
+        height: 100%;
+      }
+
+      /* Sidebar Navigation */
+      .sidebar {
+        width: 260px;
+        background-color: #1a202c;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        transition: width 0.3s ease;
+      }
+
+      .sidebar-header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+      }
+
+      .sidebar-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .nav-menu {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        flex-grow: 1;
+        overflow-y: auto; /* Allow sidebar scrolling if needed */
+      }
+
+      .nav-item a {
+        display: flex;
+        align-items: center;
+        padding: 0.9rem 1rem;
+        color: #a0aec0;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      .nav-item a:hover {
+        background-color: #2d3748;
+        color: #ffffff;
+      }
+
+      .nav-item a.active { /* Style for the active SPA link */
+        background-color: #4299e1;
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .nav-item a svg {
+        margin-right: 1rem;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      /* Main Content Area */
+      .main-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto; /* Allow scrolling within the main content */
+      }
+
+      /* Header within Main Content */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2.5rem;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        flex-shrink: 0; /* Prevent header from shrinking */
+        position: sticky; /* Keep header visible when scrolling */
+        top: 0;
+        z-index: 10;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4299e1;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      /* Content Sections Area */
+      .content-area {
+        padding: 2.5rem;
+        flex-grow: 1; /* Allow content area to take remaining space */
+      }
+
+      .content-section {
+        display: none; /* Sections hidden by default */
+      }
+
+      .content-section.active {
+        display: block; /* Show active section */
+      }
+
+
+      .card {
+        background-color: #ffffff;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 2rem; /* Add space between cards */
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1a202c;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 1.25rem;
+        margin-bottom: 2rem;
+      }
+
+      .card p {
+        line-height: 1.6;
+        font-size: 1.1rem;
+        color: #4a5568;
+      }
+
+      /* Logout Button */
+      .logout-btn {
+        background: none;
+        border: none;
+        color: #a0aec0;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+      }
+
+      .logout-btn:hover {
+        background-color: #2d3748;
+        color: #ffffff;
+      }
+
+      /* --- Form Styles (Used in Add Student & Profile) --- */
+      .form-grid { /* Generic class for form grids */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+
+      .form-group {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group.full-width,
+      .form-group.span-2 { /* Used in Profile */
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 0.6rem;
+        color: #2d3748;
+        font-size: 0.9rem;
+      }
+
+      .form-group .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(15%); /* Adjust icon position slightly */
+        color: #a0aec0;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        transition: color 0.2s ease;
+      }
+
+      .form-input:focus ~ .input-icon {
+        color: #4299e1;
+      }
+
+      .form-input,
+      .form-textarea {
+        width: 100%;
+        padding: 0.8rem 1rem 0.8rem 3rem; /* Padding for icon */
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafe;
+        transition: all 0.2s ease;
+      }
+
+      .form-textarea {
+        padding: 0.8rem 1rem; /* No icon padding needed */
+        resize: vertical;
+      }
+
+       .form-input:disabled { /* Style for disabled profile inputs */
+          background-color: #edf2f7;
+          color: #718096;
+      }
+
+
+      .form-input:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: #4299e1;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+      }
+
+      /* Day Toggle Buttons (Add Student) */
+      .form-group-days {
+        grid-column: 1 / -1;
+      }
+      .day-toggle-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .day-toggle-btn {
+        flex: 1;
+        min-width: 50px;
+        padding: 0.75rem 0.5rem;
+        border: 1px solid #e2e8f0;
+        background-color: #fdfdff;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #4a5568;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+      .day-toggle-btn:hover {
+        background-color: #f7fafc;
+        border-color: #cbd5e0;
+      }
+      .day-toggle-btn.active {
+        background-color: #4299e1;
+        color: #ffffff;
+        border-color: #4299e1;
+        box-shadow: 0 4px 15px 0 rgba(66, 153, 225, 0.2);
+      }
+
+      .form-actions {
+        grid-column: 1 / -1;
+        text-align: right;
+        margin-top: 1rem;
+      }
+
+      /* Formal Button (Add Student & Profile) */
+      .form-button {
+        background-color: #4299e1;
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      .form-button:hover {
+        background-color: #3182ce;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
+      }
+
+      /* --- Student Table Styles (My Students) --- */
+      .student-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+      }
+      .student-table thead { background-color: #f7fafc; }
+      .student-table th {
+        padding: 0.8rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #4a5568;
+        border-bottom: 2px solid #e2e8f0;
+        min-width: 100px;
+      }
+      .student-table td {
+        padding: 1rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #2d3748;
+        vertical-align: top;
+      }
+      .student-table tbody tr:last-child td { border-bottom: none; }
+      .student-table tbody tr:hover { background-color: #f7fafc; }
+
+      /* Action Buttons (My Students Table) */
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .conduct-class-btn { background-color: #e2e8f0; color: #2d3748; }
+      .conduct-class-btn:hover { background-color: #cbd5e0; }
+      .conduct-class-btn:disabled { background-color: #edf2f7; color: #a0aec0; cursor: not-allowed; }
+      .mark-paid-btn { background-color: #38a169; color: white; }
+      .mark-paid-btn:hover { background-color: #2f855a; }
+      .mark-paid-btn:disabled { background-color: #a0aec0; cursor: not-allowed; }
+      .new-month-btn { background-color: #ecc94b; color: #1a202c; }
+      .new-month-btn:hover { background-color: #d69e2e; }
+      .delete-btn { background-color: #e53e3e; color: white; }
+      .delete-btn:hover { background-color: #c53030; }
+
+       /* Status Badge & Date (My Students, Tracking) */
+      .status-badge {
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+      }
+      .status-paid { background-color: #c6f6d5; color: #2f855a; }
+      .status-unpaid { background-color: #fed7d7; color: #c53030; }
+      .last-paid-date {
+        font-size: 0.85rem;
+        color: #718096;
+        display: block;
+      }
+
+      /* Day Schedule Visualizer (My Students) */
+      .schedule-days { display: flex; gap: 6px; margin-bottom: 8px; }
+      .day-circle {
+        width: 28px; height: 28px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; font-size: 0.8rem;
+        font-weight: 600; background-color: #edf2f7; color: #718096;
+      }
+      .day-circle.active { background-color: #c6f6d5; color: #2f855a; }
+      .location-link {
+        display: flex; align-items: center; gap: 6px; color: #4299e1;
+        font-weight: 500; text-decoration: none; transition: color 0.2s;
+      }
+      .location-link:hover { color: #3182ce; text-decoration: underline; }
+      .location-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+      /* --- Summary Cards (Tracking & Profile) --- */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+      }
+      .summary-card {
+        background-color: #ffffff; padding: 1.5rem; border-radius: 12px;
+        border: 1px solid #e2e8f0; display: flex; align-items: center;
+        gap: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      }
+      .summary-card-icon {
+        width: 50px; height: 50px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; flex-shrink: 0;
+      }
+      .summary-card-icon svg { width: 24px; height: 24px; }
+      .summary-card-content h3 {
+        margin: 0 0 0.25rem 0; font-size: 0.9rem; font-weight: 500; color: #718096;
+      }
+      .summary-card-content p {
+        margin: 0; font-size: 1.75rem; font-weight: 700; color: #1a202c;
+      }
+      /* Tracking Icons */
+      .summary-card-icon.net { background-color: #c6f6d5; color: #2f855a; }
+      .summary-card-icon.collected { background-color: #bee3f8; color: #2b6cb0; }
+      .summary-card-icon.outstanding { background-color: #fed7d7; color: #c53030; }
+      .summary-card-icon.transport { background-color: #faf089; color: #b7791f; }
+      /* Profile Icons */
+      .summary-card-icon.students { background-color: #bee3f8; color: #2b6cb0; }
+      .summary-card-icon.salary { background-color: #c6f6d5; color: #2f855a; }
+
+
+      /* Financial Breakdown Table (Tracking) */
+      .tracking-table { /* Use a specific class if needed */
+        width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.95rem;
+      }
+       .tracking-table thead { background-color: #f7fafc; }
+       .tracking-table th {
+        padding: 0.8rem 1rem; text-align: left; font-weight: 600;
+        color: #4a5568; border-bottom: 2px solid #e2e8f0;
+      }
+       .tracking-table td {
+        padding: 1rem 1rem; border-bottom: 1px solid #e2e8f0;
+        color: #2d3748; vertical-align: middle;
+      }
+       .tracking-table tbody tr:last-child td { border-bottom: none; }
+       .tracking-table tbody tr:hover { background-color: #f7fafc; }
+       .text-success { color: #2f855a; }
+       .text-danger { color: #c53030; }
+       .text-neutral { color: #718096; }
+
+      /* Profile Specific Grid */
+       .profile-card-grid {
+         display: grid;
+         grid-template-columns: 1fr; /* Stack cards on profile page */
+         gap: 2.5rem;
+       }
+
+
+      /* Confirmation Modal (Delete Student) */
+      .modal-backdrop {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center;
+        justify-content: center; z-index: 1000; visibility: hidden; opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      .modal-backdrop.visible { visibility: visible; opacity: 1; }
+      .modal-content {
+        background-color: white; padding: 2rem; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 90%; max-width: 400px;
+        text-align: center; transform: scale(0.95); transition: transform 0.3s ease;
+      }
+      .modal-backdrop.visible .modal-content { transform: scale(1); }
+      .modal-content h3 { margin-top: 0; font-size: 1.25rem; color: #1a202c; }
+      .modal-content p { color: #4a5568; margin-bottom: 1.5rem; }
+      .modal-actions { display: flex; justify-content: center; gap: 1rem; }
+      .modal-btn {
+        padding: 0.6rem 1.2rem; border: none; border-radius: 8px;
+        font-weight: 600; cursor: pointer; transition: all 0.2s;
+      }
+      .modal-btn-cancel { background-color: #e2e8f0; color: #2d3748; }
+      .modal-btn-cancel:hover { background-color: #cbd5e0; }
+      .modal-btn-confirm { background-color: #e53e3e; color: white; }
+      .modal-btn-confirm:hover { background-color: #c53030; }
+
+
+       /* Custom Alert Box */
+      .alert-box {
+        position: fixed; top: -150px; left: 50%; transform: translateX(-50%);
+        padding: 1rem 2rem; border-radius: 8px; background-color: #2d3748;
+        color: white; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transition: top 0.5s ease-out; z-index: 2000;
+      }
+      .alert-box.success { background-color: #38a169; }
+      .alert-box.error { background-color: #e53e3e; }
+      .alert-box.show { top: 20px; }
+
+
+    </style>
+  </head>
+  <body>
+     <!-- Custom Alert Box -->
+    <div id="custom-alert" class="alert-box"></div>
+
+     <!-- Confirmation Modal -->
+    <div id="delete-modal" class="modal-backdrop">
+      <div class="modal-content">
+        <h3>Delete Student</h3>
+        <p>Are you sure you want to delete this student? This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button id="modal-cancel-btn" class="modal-btn modal-btn-cancel">Cancel</button>
+          <button id="modal-confirm-btn" class="modal-btn modal-btn-confirm">Delete</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="dashboard-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>Dashboard</h2>
+        </div>
+        <ul class="nav-menu">
+           <!-- Links now use data-target for SPA navigation -->
+          <li class="nav-item">
+            <a href="#" class="nav-link active" data-target="home">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              Home
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-target="add-student">
+               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+              Add Student
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-target="my-students">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              My Students
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-target="tracking-salary">
+               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Tracking Salary
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" data-target="profile">
+               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              Profile
+            </a>
+          </li>
+        </ul>
+        <div class="nav-item">
+          <a href="#" id="logout-button" class="logout-btn">
+             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Logout
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content (Header + Page Content) -->
+      <main class="main-content">
+        <header class="header">
+          <h1 id="header-title">Home</h1>
+          <div class="user-profile">
+            <div id="user-avatar" class="user-avatar">?</div>
+            <span id="user-name" class="user-name">Loading...</span>
+          </div>
+        </header>
+
+        <div class="content-area">
+          <!-- Home Section -->
+          <section id="home" class="content-section active">
+            <div class="card">
+              <h2>Welcome to Your Dashboard!</h2>
+              <p>
+                This is your central hub for managing students, tracking payments, and viewing your profile. Use the navigation on the left to get started.
+              </p>
+            </div>
+          </section>
+
+          <!-- Add Student Section -->
+          <section id="add-student" class="content-section">
+            <div class="card">
+              <h2>Add a New Student</h2>
+              <form id="add-student-form" class="form-grid"> 
+                 <!-- Student Name -->
+                <div class="form-group">
+                  <label for="student-name" class="form-label">Student Name</label>
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" ></path> </svg>
+                  <input type="text" id="student-name" class="form-input" placeholder="Enter full name" required />
+                </div>
+                <!-- Email Address -->
+                <div class="form-group">
+                  <label for="student-email" class="form-label">Email Address</label>
+                   <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" ></path> </svg>
+                  <input type="email" id="student-email" class="form-input" placeholder="Enter email address" />
+                </div>
+                 <!-- Map Location Link -->
+                <div class="form-group full-width">
+                  <label for="student-map-link" class="form-label">Map Location Link</label>
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                  <input type="url" id="student-map-link" class="form-input" placeholder="e.g., https://maps.app.goo.gl/..." />
+                </div>
+                <!-- Address -->
+                <div class="form-group full-width">
+                  <label for="student-address" class="form-label">Address</label>
+                  <textarea id="student-address" class="form-textarea" placeholder="Enter student's full address" rows="3" required></textarea>
+                </div>
+                 <!-- Teaching Days Buttons -->
+                <div class="form-group-days">
+                  <label class="form-label">Teaching Days (Weekly)</label>
+                  <div id="day-buttons-container" class="day-toggle-buttons">
+                    <button type="button" class="day-toggle-btn" data-day="Sat">Sat</button>
+                    <button type="button" class="day-toggle-btn" data-day="Sun">Sun</button>
+                    <button type="button" class="day-toggle-btn" data-day="Mon">Mon</button>
+                    <button type="button" class="day-toggle-btn" data-day="Tue">Tue</button>
+                    <button type="button" class="day-toggle-btn" data-day="Wed">Wed</button>
+                    <button type="button" class="day-toggle-btn" data-day="Thu">Thu</button>
+                    <button type="button" class="day-toggle-btn" data-day="Fri">Fri</button>
+                  </div>
+                </div>
+                <!-- Total Classes (per Month) -->
+                <div class="form-group">
+                  <label for="teaching-days" class="form-label">Total Classes (per Month)</label>
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <input type="number" id="teaching-days" class="form-input" placeholder="Enter number of classes" min="1" required />
+                </div>
+                <!-- Salary (per Month) -->
+                <div class="form-group">
+                  <label for="monthly-salary" class="form-label">Salary (per Month)</label>
+                   <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18zm-3-9h6"></path></svg>
+                  <input type="number" id="monthly-salary" class="form-input" placeholder="Enter amount" min="0" required />
+                </div>
+                 <!-- Transport Cost (Per Day) -->
+                <div class="form-group">
+                  <label for="transport-cost" class="form-label">Transportation Cost (Per Day)</label>
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3m-4 0V8m0 8h.01M12 12h.01M12 8h.01M16 12h.01M16 8h.01M5 16l-1.4-1.4M19 16l1.4-1.4"></path></svg>
+                  <input type="number" id="transport-cost" class="form-input" placeholder="Enter cost per day" min="0" required />
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="form-button">Add Student</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- My Students Section -->
+          <section id="my-students" class="content-section">
+            <div class="card">
+              <h2>My Student List</h2>
+              <table class="student-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Schedule & Location</th>
+                    <th>Classes Conducted</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="student-table-body">
+                  <!-- Student rows will be inserted here by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Tracking Salary Section -->
+          <section id="tracking-salary" class="content-section">
+             <!-- Summary Cards -->
+             <div class="summary-grid">
+               <!-- Net Earnings Card -->
+               <div class="summary-card">
+                 <div class="summary-card-icon net">
+                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18zm-3-9h6"></path></svg>
+                 </div>
+                 <div class="summary-card-content">
+                   <h3>Net Earnings (This Month)</h3>
+                   <p id="net-earnings">0</p>
+                 </div>
+               </div>
+               <!-- Collected Card -->
+               <div class="summary-card">
+                 <div class="summary-card-icon collected">
+                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                 </div>
+                 <div class="summary-card-content">
+                   <h3>Total Collected</h3>
+                   <p id="total-collected">0</p>
+                 </div>
+               </div>
+               <!-- Outstanding Card -->
+               <div class="summary-card">
+                 <div class="summary-card-icon outstanding">
+                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 </div>
+                 <div class="summary-card-content">
+                   <h3>Total Outstanding</h3>
+                   <p id="total-outstanding">0</p>
+                 </div>
+               </div>
+               <!-- Transport Card -->
+               <div class="summary-card">
+                 <div class="summary-card-icon transport">
+                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3m-4 0V8m0 8h.01M12 12h.01M12 8h.01M16 12h.01M16 8h.01M5 16l-1.4-1.4M19 16l1.4-1.4"></path></svg>
+                 </div>
+                 <div class="summary-card-content">
+                   <h3>Total Transport Costs</h3>
+                   <p id="total-transport">0</p>
+                 </div>
+               </div>
+             </div>
+
+             <!-- Financial Breakdown -->
+             <div class="card">
+               <h2>Financial Breakdown</h2>
+               <table class="tracking-table"> 
+                 <thead>
+                   <tr>
+                     <th>Student Name</th>
+                     <th>Payment Status</th>
+                     <th>Monthly Salary</th>
+                     <th>Transport (per day)</th>
+                     <th>Total Transport Cost</th>
+                     <th>Net from Student</th>
+                   </tr>
+                 </thead>
+                 <tbody id="tracking-table-body">
+                   <!-- Data will be loaded here -->
+                 </tbody>
+               </table>
+             </div>
+          </section>
+
+          <!-- Profile Section -->
+          <section id="profile" class="content-section">
+             <!-- Summary Cards -->
+            <div class="summary-grid">
+              <!-- Total Students Card -->
+              <div class="summary-card">
+                <div class="summary-card-icon students">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div class="summary-card-content">
+                  <h3>Total Students</h3>
+                  <p id="total-students">0</p>
+                </div>
+              </div>
+              <!-- Total Monthly Salary Card -->
+              <div class="summary-card">
+                <div class="summary-card-icon salary">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18zm-3-9h6"></path></svg>
+                </div>
+                <div class="summary-card-content">
+                  <h3>Total Monthly Salary</h3>
+                  <p id="total-salary">0</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-card-grid">
+              <!-- Profile Details Card -->
+              <div class="card">
+                <h2>Profile Details</h2>
+                <form id="profile-details-form" class="form-grid"> 
+                  <div class="form-group">
+                    <label for="profile-username" class="form-label">Username</label>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" ></path> </svg>
+                    <input type="text" id="profile-username" class="form-input" disabled />
+                  </div>
+                  <div class="form-group">
+                    <label for="profile-email" class="form-label">Email Address</label>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" ></path> </svg>
+                    <input type="email" id="profile-email" class="form-input" disabled />
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="form-button">Update Profile</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Change Password Card -->
+              <div class="card">
+                <h2>Change Password</h2>
+                <form id="change-password-form" class="form-grid">
+                  <div class="form-group span-2">
+                    <label for="current-password" class="form-label">Current Password</label>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <input type="password" id="current-password" class="form-input" placeholder="••••••••" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="new-password" class="form-label">New Password</label>
+                     <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <input type="password" id="new-password" class="form-input" placeholder="••••••••" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm-password" class="form-label">Confirm New Password</label>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="••••••••" required />
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="form-button">Change Password</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+        </div> <!-- End .content-area -->
+      </main>
+    </div> <!-- End .dashboard-container -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        const API_URL = "http://localhost:5000";
+
+        // --- 1. User Authentication & Display ---
+        const userJSON = localStorage.getItem("user");
+        if (!userJSON) {
+          console.warn("No user found, redirecting to login.");
+          // showCustomAlert("Please log in to continue.", "error");
+          // setTimeout(() => window.location.href = "login.html", 1500); // Assumes login.html exists
+          return;
+        }
+        const user = JSON.parse(userJSON);
+        document.getElementById("user-name").textContent = user.username;
+        document.getElementById("user-avatar").textContent = user.username.charAt(0).toUpperCase();
+
+        // --- Element References ---
+        const studentTableBody = document.getElementById("student-table-body");
+        const trackingTableBody = document.getElementById("tracking-table-body");
+        const navLinks = document.querySelectorAll(".nav-link");
+        const contentSections = document.querySelectorAll(".content-section");
+        const headerTitle = document.getElementById("header-title");
+        const deleteModal = document.getElementById("delete-modal");
+        const modalConfirmBtn = document.getElementById("modal-confirm-btn");
+        const modalCancelBtn = document.getElementById("modal-cancel-btn");
+        let studentIdToDelete = null;
+
+        // --- Helper Functions ---
+        function formatCurrency(value) {
+           return value ? value.toLocaleString("en-IN") : '0'; // Handle potential null/undefined
+        }
+
+         function showCustomAlert(message, type = 'success') {
+            const alertBox = document.getElementById('custom-alert');
+            alertBox.textContent = message;
+            alertBox.className = 'alert-box'; // Reset classes
+            alertBox.classList.add(type); // 'success' or 'error'
+            alertBox.classList.add('show');
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 3000);
+        }
+
+        function createDayScheduleVisual(schedule) {
+          const daysOfWeek = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+          let html = '<div class="schedule-days">';
+          const activeDays = Array.isArray(schedule) ? schedule : [];
+          daysOfWeek.forEach(day => {
+            const isActive = activeDays.includes(day);
+            html += `<div class="day-circle ${isActive ? "active" : ""}" title="${day}">${day.charAt(0)}</div>`;
+          });
+          html += "</div>";
+          return html;
+        }
+
+        // --- Data Fetching and Rendering ---
+
+        // Fetch and Display Students (for My Students Tab)
+        async function fetchAndDisplayStudents() {
+          if (!user || !user._id) return;
+          try {
+            const res = await fetch(`${API_URL}/students/${user._id}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const students = await res.json();
+            studentTableBody.innerHTML = ""; // Clear existing table rows
+
+            if (students.length === 0) {
+              studentTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1.5rem;">You have not added any students yet.</td></tr>';
+              return;
+            }
+
+            students.forEach((student) => {
+               const isPaid = student.paymentStatus === "Paid";
+               let lastPaidText = "";
+               if (student.lastPaidDate) {
+                 lastPaidText = `Paid on: ${new Date(student.lastPaidDate).toLocaleDateString()}`;
+               }
+
+               let actionButtons = "";
+                if (isPaid) {
+                  // If paid, disable "+1 Class" and "Mark as Paid". Enable "New Month".
+                  actionButtons = `
+                    <button class="action-btn conduct-class-btn" disabled>+1 Class</button>
+                    <button class="action-btn mark-paid-btn" disabled>Paid</button>
+                    <button class="action-btn new-month-btn" data-studentid="${student._id}">New Month</button>
+                  `;
+                } else {
+                  // --- FIX: This is the logic you wanted ---
+                  // The "+1 Class" button is NOT disabled, even if 16/16.
+                  // It only gets disabled once they are marked as "Paid".
+                  actionButtons = `
+                    <button class="action-btn conduct-class-btn" data-studentid="${student._id}">+1 Class</button>
+                    <button class="action-btn mark-paid-btn" data-studentid="${student._id}">Mark as Paid</button>
+                  `;
+                }
+                // Delete button is always added
+                actionButtons += `<button class="action-btn delete-btn" data-studentid="${student._id}">Delete</button>`;
+
+
+              const scheduleVisual = createDayScheduleVisual(student.teachingSchedule);
+              const locationLink = student.mapLink
+                ? `<a href="${student.mapLink}" target="_blank" rel="noopener noreferrer" class="location-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Open Map</a>`
+                : '<span style="color: #718096; display: flex; align-items: center; gap: 6px;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px; height: 16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> No location</span>';
+
+              
+              const conductedClasses = student.classesConducted || 0;
+
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td><strong>${student.name}</strong><br><small style="color: #718096;">${student.email || 'No Email'}</small></td>
+                <td>${scheduleVisual}${locationLink}</td>
+                <td>
+                    <strong>${conductedClasses}</strong> / ${student.teachingDays || 'N/A'}
+                 </td>
+                 <td>
+                    <span class="status-badge ${isPaid ? 'status-paid' : 'status-unpaid'}">${student.paymentStatus}</span>
+                    ${isPaid ? `<small class="last-paid-date">${lastPaidText}</small>` : ""}
+                 </td>
+                 <td>${actionButtons}</td>
+              `;
+              studentTableBody.appendChild(row);
+            });
+          } catch (err) {
+            console.error("Error fetching students:", err);
+            showCustomAlert("Failed to load students.", "error");
+            studentTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Failed to load students.</td></tr>';
+          }
+        }
+
+
+        // Fetch and Display Tracking Data
+        async function fetchTrackingData() {
+          if (!user || !user._id) return;
+          try {
+            const res = await fetch(`${API_URL}/students/${user._id}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const students = await res.json();
+
+            let totalCollected = 0;
+            let totalOutstanding = 0;
+            let totalTransportCost = 0;
+            trackingTableBody.innerHTML = ""; // Clear table
+
+             if (students.length === 0) {
+               trackingTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 1.5rem;">No student data to track.</td></tr>';
+             } else {
+               students.forEach(student => {
+                  const isPaid = student.paymentStatus === "Paid";
+                  const salary = parseFloat(student.salary) || 0;
+                  const transportPerDay = parseFloat(student.transportCost) || 0;
+                  
+                  // This logic is now correct.
+                  // If PAID, transport cost is for the *monthly target* number of classes.
+                  // If UNPAID, transport cost is for the *classes conducted so far*.
+                  const classesForCost = isPaid ? (student.teachingDays || 0) : (student.classesConducted || 0);
+                  const studentTransportTotal = classesForCost * transportPerDay;
+
+                  let netFromStudent = 0;
+                  let netClass = "text-neutral";
+
+                  totalTransportCost += studentTransportTotal;
+
+                  if (isPaid) {
+                    // --- THIS IS THE MATH YOU WANTED ---
+                    // If paid, their salary is added to totalCollected.
+                    totalCollected += salary;
+                    netFromStudent = salary - studentTransportTotal;
+                    netClass = netFromStudent >= 0 ? "text-success" : "text-danger";
+                  } else {
+                    // If unpaid, their salary is added to totalOutstanding.
+                    totalOutstanding += salary;
+                    netFromStudent = -studentTransportTotal; // Only show cost if unpaid
+                     if (studentTransportTotal > 0) netClass = "text-danger";
+                  }
+
+                  const row = document.createElement("tr");
+                  row.innerHTML = `
+                    <td><strong>${student.name}</strong></td>
+                    <td><span class="status-badge ${isPaid ? 'status-paid' : 'status-unpaid'}">${student.paymentStatus}</span></td>
+                    <td>${formatCurrency(salary)}</td>
+                    <td>${formatCurrency(transportPerDay)}</td>
+                    <td>${formatCurrency(studentTransportTotal)}</td>
+                    <td class="${netClass}"><strong>${formatCurrency(netFromStudent)}</strong></td>
+                  `;
+                  trackingTableBody.appendChild(row);
+               });
+             }
+
+            // The totals are now correctly calculated based on the loop above.
+            const netEarnings = totalCollected - totalTransportCost;
+            document.getElementById("net-earnings").textContent = formatCurrency(netEarnings);
+            document.getElementById("total-collected").textContent = formatCurrency(totalCollected);
+            document.getElementById("total-outstanding").textContent = formatCurrency(totalOutstanding);
+            document.getElementById("total-transport").textContent = formatCurrency(totalTransportCost);
+
+          } catch (err) {
+            console.error("Error fetching tracking data:", err);
+            showCustomAlert("Failed to load tracking data.", "error");
+            trackingTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Failed to load data.</td></tr>';
+          }
+        }
+
+
+         // Fetch and Display Profile Data
+        async function fetchProfileData() {
+          if (!user || !user._id) return;
+          // Populate profile fields from localStorage (user object)
+          document.getElementById("profile-username").value = user.username;
+          document.getElementById("profile-email").value = user.email;
+
+          try {
+            const res = await fetch(`${API_URL}/students/${user._id}`);
+             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const students = await res.json();
+
+            let totalStudents = students.length;
+            // Recalculate total salary based on all students
+            let totalMonthlySalary = students.reduce((sum, student) => sum + (parseFloat(student.salary) || 0), 0);
+
+            document.getElementById("total-students").textContent = totalStudents;
+            document.getElementById("total-salary").textContent = formatCurrency(totalMonthlySalary);
+          } catch (err) {
+            console.error("Error fetching student data for profile summary:", err);
+            showCustomAlert("Could not load summary data.", "error");
+          }
+        }
+
+
+        // --- Event Listeners ---
+
+        // Sidebar Navigation
+        navLinks.forEach((link) => {
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
+            const targetId = this.dataset.target; // Get target section ID
+            if (!targetId) return; // Ignore links without data-target
+
+            headerTitle.textContent = this.innerText.trim();
+            navLinks.forEach((nav) => nav.classList.remove("active"));
+            this.classList.add("active");
+
+            contentSections.forEach((section) => {
+              section.classList.toggle("active", section.id === targetId);
+            });
+
+            // Fetch data when switching to relevant tabs
+            if (targetId === "my-students") fetchAndDisplayStudents();
+            if (targetId === "tracking-salary") fetchTrackingData();
+            if (targetId === "profile") fetchProfileData();
+
+             // Update URL hash for refresh/bookmarking
+             window.location.hash = targetId;
+          });
+        });
+
+        // Logout Button
+        document.getElementById("logout-button").addEventListener("click", function (event) {
+          event.preventDefault();
+          localStorage.removeItem("user");
+          showCustomAlert("You have been logged out.", "success");
+           setTimeout(() => {
+              console.log("Redirecting to login...");
+               window.location.href = "login.html"; // Make sure you have a login page
+           }, 1500);
+        });
+
+        // Day Toggle Buttons (Add Student Form)
+        document.getElementById("day-buttons-container").addEventListener("click", function (event) {
+          if (event.target.classList.contains("day-toggle-btn")) {
+            event.target.classList.toggle("active");
+          }
+        });
+
+        // Add Student Form Submission
+        document.getElementById("add-student-form").addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const selectedDays = Array.from(document.querySelectorAll("#day-buttons-container .day-toggle-btn.active"))
+                                  .map(btn => btn.dataset.day);
+
+          const studentData = {
+            name: document.getElementById("student-name").value.trim(),
+            email: document.getElementById("student-email").value.trim() || null, // Allow empty email
+            address: document.getElementById("student-address").value.trim(),
+            mapLink: document.getElementById("student-map-link").value.trim() || null, // Allow empty map link
+            teachingDays: document.getElementById("teaching-days").value,
+            teachingSchedule: selectedDays,
+            salary: document.getElementById("monthly-salary").value,
+            transportCost: document.getElementById("transport-cost").value,
+            teacherId: user._id,
+          };
+
+           // Basic validation
+           if (!studentData.name || !studentData.teachingDays || !studentData.salary || !studentData.transportCost || !studentData.address) {
+               showCustomAlert("Please fill in all required fields.", "error");
+               return;
+           }
+
+
+          try {
+            const res = await fetch(`${API_URL}/students`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(studentData),
+            });
+             if (!res.ok) {
+                 const data = await res.json();
+                 throw new Error(data.error || `HTTP error! status: ${res.status}`);
+             }
+
+            showCustomAlert("✅ Student added successfully!", "success");
+            this.reset(); // Reset form fields
+             document.querySelectorAll("#day-buttons-container .day-toggle-btn.active")
+                     .forEach(btn => btn.classList.remove("active")); // Deselect days
+            
+            // --- FIX: Refresh all data after adding a new student ---
+            fetchProfileData(); // Update total students/salary in profile
+            fetchTrackingData(); // Update outstanding salary in tracking
+
+            // Switch to My Students tab
+            document.querySelector('.nav-link[data-target="my-students"]').click();
+
+          } catch (err) {
+            console.error("Error adding student:", err);
+            showCustomAlert(`❌ Failed to add student: ${err.message}`, "error");
+          }
+        });
+
+        // Student Table Action Buttons (Event Delegation)
+        studentTableBody.addEventListener("click", async function (event) {
+          const target = event.target.closest(".action-btn"); // Ensure we clicked a button
+          if (!target) return;
+
+          const studentId = target.dataset.studentid;
+          if (!studentId) return;
+
+
+          let url = "";
+          let method = "PATCH";
+          let successMessage = "";
+          let errorMessage = "";
+          let actionType = ""; // To know which action was taken
+
+          if (target.classList.contains("conduct-class-btn")) {
+              url = `${API_URL}/students/${studentId}/conduct-class`;
+              successMessage = "Class count updated.";
+              errorMessage = "Failed to update class count.";
+              actionType = "conduct";
+          } else if (target.classList.contains("mark-paid-btn")) {
+               url = `${API_URL}/students/${studentId}/mark-paid`;
+               successMessage = "Marked as paid.";
+               errorMessage = "Failed to update payment status.";
+               actionType = "paid";
+          } else if (target.classList.contains("new-month-btn")) {
+               url = `${API_URL}/students/${studentId}/new-month`;
+               successMessage = "Reset for new month.";
+               errorMessage = "Failed to reset for new month.";
+               actionType = "reset";
+          } else if (target.classList.contains("delete-btn")) {
+              studentIdToDelete = studentId;
+              deleteModal.classList.add("visible");
+              return; // Don't proceed with fetch yet, wait for modal confirmation
+          } else {
+              return; // Not a recognized action button
+          }
+
+           try {
+               const res = await fetch(url, { method: method });
+                if (!res.ok) {
+                  const errData = await res.json();
+                  throw new Error(errData.error || `HTTP error! status: ${res.status}`);
+                }
+               showCustomAlert(successMessage, "success");
+               
+               // --- FIX: Refresh ALL data after any action ---
+               // This is the fix for your "Total Collected" problem.
+               fetchAndDisplayStudents(); // Refresh table
+               fetchTrackingData(); // Refresh tracking numbers
+               fetchProfileData(); // Refresh profile numbers
+
+           } catch (err) {
+               console.error(`Error for action ${actionType}:`, err);
+               showCustomAlert(`${errorMessage}: ${err.message}`, "error");
+           }
+        });
+
+        // Delete Confirmation Modal Buttons
+        modalCancelBtn.addEventListener("click", () => {
+          deleteModal.classList.remove("visible");
+          studentIdToDelete = null;
+        });
+
+        modalConfirmBtn.addEventListener("click", async () => {
+          if (!studentIdToDelete) return;
+          try {
+            const res = await fetch(`${API_URL}/students/${studentIdToDelete}`, { method: "DELETE" });
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            showCustomAlert("Student deleted successfully.", "success");
+
+            // --- FIX: Refresh ALL data after delete ---
+            fetchAndDisplayStudents(); // Refresh table
+            fetchTrackingData(); // Refresh tracking numbers
+            fetchProfileData(); // Refresh profile numbers
+
+          } catch (err) {
+            console.error("Error deleting student:", err);
+            showCustomAlert("Failed to delete student.", "error");
+          } finally {
+            deleteModal.classList.remove("visible");
+            studentIdToDelete = null;
+          }
+        });
+
+
+        // Profile Form Submissions (Currently Placeholder)
+        document.getElementById("profile-details-form").addEventListener("submit", function(event) {
+          event.preventDefault();
+          showCustomAlert("Update profile is not yet implemented.", "error");
+        });
+
+        document.getElementById("change-password-form").addEventListener("submit", function(event) {
+          event.preventDefault();
+          const newPass = document.getElementById("new-password").value;
+          const confirmPass = document.getElementById("confirm-password").value;
+          if (newPass !== confirmPass) {
+            showCustomAlert("New passwords do not match.", "error");
+            return;
+          }
+          showCustomAlert("Change password is not yet implemented.", "error");
+          this.reset();
+        });
+
+         // --- Initial Page Load Logic ---
+         function handleInitialLoad() {
+             const currentHash = window.location.hash.substring(1); // Get hash without '#'
+             const validTargets = ["home", "add-student", "my-students", "tracking-salary", "profile"];
+
+             let targetToShow = "home"; // Default to home
+             if (currentHash && validTargets.includes(currentHash)) {
+                 targetToShow = currentHash;
+             }
+
+             // Find the corresponding nav link and click it
+             const targetLink = document.querySelector(`.nav-link[data-target="${targetToShow}"]`);
+             if (targetLink) {
+                 targetLink.click(); // This triggers the navigation logic
+             } else {
+                 // Fallback if somehow the link isn't found
+                 document.querySelector('.nav-link[data-target="home"]').click();
+             }
+         }
+
+         handleInitialLoad(); // Call on page load
+
+      });
+    </script>
+  </body>
+</html>
+

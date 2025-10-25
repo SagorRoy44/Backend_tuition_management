@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Tuition Management</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-box">
+            <h2>Create an Account</h2>
+            <form id="signup-form">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Choose a username" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+            <div class="links">
+                <p>Already have an account? <a href="login.html">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- KEY CHANGE ---
+    // Added an event listener to the form, which is a more modern approach.
+    const form = document.getElementById("signup-form");
+    form.addEventListener('submit', handleSignup);
+    
+    async function handleSignup(event) {
+        // This stops the page from reloading on submit
+        event.preventDefault();
+
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        
+        const userData = { username, email, password };
+
+        try {
+            const res = await fetch("http://localhost:5000/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) { // res.ok checks for statuses 200-299
+                alert("✅ User registered successfully! Please log in.");
+                window.location.href = "login.html"; // Redirect to login page
+            } else {
+                alert("❌ Registration failed: " + data.error);
+            }
+        
+        } catch (err) {
+            console.error("Signup error:", err);
+            alert("Something went wrong! Could not connect to server.");
+        }
+    }
+</script>
+</body>
+</html>
