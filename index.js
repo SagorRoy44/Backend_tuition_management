@@ -1,6 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
+const mongoose = require('mongoose');
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb"); // Import ObjectId
 const bcrypt = require("bcrypt");
@@ -8,12 +9,19 @@ const bcrypt = require("bcrypt");
 const app = express();
 const port = process.env.PORT || 5000;
 
+const dbId = process.env.DB_ID;
+const dbPass = process.env.DB_PASS;
+
 app.use(cors());
 app.use(express.json());
 
 const uri =
   process.env.MONGO_URI ||
-  "mongodb+srv://sagorroy4872_db_user:EH6Hk3kplVzS4kcU@cluster0.hnylpj5.mongodb.net/sallery?retryWrites=true&w=majority";
+  "mongodb+srv://${dbId}:${dbPass}@cluster0.hnylpj5.mongodb.net/sallery?retryWrites=true&w=majority";
+
+mongoose.connect(connectionString)
+  .then(() => console.log('Connected to MongoDB!'))
+  .catch(err => console.error('Could not connect to MongoDB:', err));
 
 const client = new MongoClient(uri, {
   serverApi: {
